@@ -18,7 +18,7 @@ type Output struct {
 	*bt.Output
 }
 
-type AddToConsensusBlacklistArgs struct {
+type BlacklistArgs struct {
 	Funds []Fund `json:"funds"`
 }
 
@@ -38,8 +38,8 @@ type ConfiscationTransaction struct {
 // Fund represents a fund to freeze or unfreeze
 type Fund struct {
 	TxOut                      TxOut     `json:"txOut"`
-	EnforceAtHeight            []Enforce `json:"enforceAtHeight"`
-	PolicyExpiresWithConsensus bool      `json:"policyExpiresWithConsensus"`
+	EnforceAtHeight            []Enforce `json:"enforceAtHeight,omitempty"`
+	PolicyExpiresWithConsensus bool      `json:"policyExpiresWithConsensus,omitempty"`
 }
 
 // Enforce represents block start and end to enforce freezing
@@ -249,22 +249,29 @@ type SendRawTransactionsResponse struct {
 	} `json:"unconfirmed"`
 }
 
-// AddToConsensusBlacklistResponse response
-type AddToConsensusBlacklistResponse struct {
-	NotProcessed []struct {
-		TxOut struct {
-			TxId string `json:"txId"`
-			Vout int    `json:"vout"`
-		} `json:"txOut"`
-		Reason string `json:"reason"`
-	} `json:"notProcessed"`
+// BlacklistNotProcessed returns the unprocessed utxos
+type BlacklistNotProcessed struct {
+	TxOut  TxOut  `json:"txOut"`
+	Reason string `json:"reason"`
 }
 
+// BlacklistResponse response
+type BlacklistResponse struct {
+	NotProcessed []BlacklistNotProcessed `json:"notProcessed"`
+}
+
+// WhitelistConfiscationTransaction defines the whitelist confiscation tx response
+type WhitelistConfiscationTransaction struct {
+	TxId string `json:"txId"`
+}
+
+// WhitelistNotProcessed defines the not processed confiscation txs
+type WhitelistNotProcessed struct {
+	ConfiscationTransaction WhitelistConfiscationTransaction `json:"confiscationTx"`
+	Reason                  string                           `json:"reason"`
+}
+
+// AddToConfiscationTransactionWhitelistResponse defines the response
 type AddToConfiscationTransactionWhitelistResponse struct {
-	NotProcessed []struct {
-		ConfiscationTransaction struct {
-			TxId string `json:"txId"`
-		} `json:"confiscationTx"`
-		Reason string `json:"reason"`
-	} `json:"notProcessed"`
+	NotProcessed []WhitelistNotProcessed `json:"notProcessed"`
 }

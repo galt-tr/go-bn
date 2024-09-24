@@ -420,7 +420,7 @@ type NodeClientMock struct {
 	AddToConfiscationTransactionWhitelistFunc func(ctx context.Context, confiscationTransactions []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error)
 
 	// AddToConsensusBlacklistFunc mocks the AddToConsensusBlacklist
-	AddToConsensusBlacklistFunc func(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error)
+	AddToConsensusBlacklistFunc func(ctx context.Context, funds []models.Fund) (*models.BlacklistResponse, error)
 
 	// BackupWalletFunc mocks the BackupWallet method.
 	BackupWalletFunc func(ctx context.Context, dest string) error
@@ -2052,7 +2052,7 @@ func (mock *NodeClientMock) AddToConfiscationTransactionWhitelist(ctx context.Co
 }
 
 // AddToConsensusBlacklist calls AddToConsensusBlacklistFunc
-func (mock *NodeClientMock) AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error) {
+func (mock *NodeClientMock) AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.BlacklistResponse, error) {
 	if mock.AddToConsensusBlacklistFunc == nil {
 		panic("TransactionClientMock.AddToConsensusBlacklistFunc: method is nil but TransactionClient.CreateRawTransaction was just called")
 	}

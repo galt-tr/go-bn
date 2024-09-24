@@ -2,15 +2,18 @@ package bn
 
 import (
 	"context"
+	"encoding/json"
 	imodels "github.com/libsv/go-bn/internal/models"
 	"github.com/libsv/go-bn/models"
 	"github.com/libsv/go-bt/v2"
+	"log"
 )
 
 // TransactionClient interfaces interaction with the transaction sub commands on a bitcoin node.
 type TransactionClient interface {
 	AddToConfiscationTransactionWhitelist(ctx context.Context, funds []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error)
-	AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error)
+	AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.BlacklistResponse, error)
+	RemoveFromPolicyBlacklist(ctx context.Context, funds []models.Fund) (*models.BlacklistResponse, error)
 	CreateRawTransaction(ctx context.Context, utxos bt.UTXOs, params models.ParamsCreateRawTransaction) (*bt.Tx, error)
 	FundRawTransaction(ctx context.Context, tx *bt.Tx,
 		opts *models.OptsFundRawTransaction) (*models.FundRawTransaction, error)
@@ -67,10 +70,16 @@ func (c *client) SendRawTransactions(ctx context.Context,
 	return &resp, c.rpc.Do(ctx, "sendrawtransactions", &resp, params)
 }
 
-func (c *client) AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error) {
-	var resp models.AddToConsensusBlacklistResponse
-	req := models.AddToConsensusBlacklistArgs{Funds: funds}
+func (c *client) AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.BlacklistResponse, error) {
+	var resp models.BlacklistResponse
+	req := models.BlacklistArgs{Funds: funds}
 	return &resp, c.rpc.Do(ctx, "addToConsensusBlacklist", &resp, req)
+}
+
+func (c *client) RemoveFromPolicyBlacklist(ctx context.Context, funds []models.Fund) (*models.BlacklistResponse, error) {
+	var resp models.BlacklistResponse
+	req := models.BlacklistArgs{Funds: funds}
+	return &resp, c.rpc.Do(ctx, "removeFromPolicyBlacklist", &resp, req)
 }
 
 func (c *client) AddToConfiscationTransactionWhitelist(ctx context.Context, confiscationTransactions []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error) {
@@ -78,5 +87,7 @@ func (c *client) AddToConfiscationTransactionWhitelist(ctx context.Context, conf
 	req := models.AddToConfiscationTxIdWhitelistArgs{
 		confiscationTransactions,
 	}
+	a, _ := json.Marshal(req)
+	log.Printf("%s", a)
 	return &resp, c.rpc.Do(ctx, "addToConfiscationTxidWhitelist", &resp, req)
 }
